@@ -11,5 +11,4 @@ venv/
 
 # Carpetas específicas
 .vscode/
-data/
 *.log
