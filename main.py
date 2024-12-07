@@ -43,7 +43,7 @@ class DashboardApp:
 
     def render_sidebar(self):
         """Renderiza el sidebar con la navegación."""
-        st.sidebar.image("assets\R.png", width=120)
+        st.sidebar.image("assets/R.png", width=120)
         st.sidebar.title("Navegación")
         for section in self.secciones.keys():
             st.sidebar.button(section, on_click=self.set_section, args=(section,))
