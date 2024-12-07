@@ -1,6 +1,5 @@
 import pandas as pd
 import streamlit as st
-import geopandas as gpd
 
 @st.cache_data
 def load_municipio_data():
@@ -53,10 +52,3 @@ def load_nacional_data():
     df[columns_to_convert] = df[columns_to_convert] / 3
     
     return df
-
-@st.cache_data
-def cargar_geodatos():
-    """Cargar geodatos desde archivos locales."""
-    ent_gdf = gpd.read_file("./data/shp/shp_ent_tidy_data.shp")
-    mpio_gdf = gpd.read_file("./data/shp/shp_mun_tidy_data.shp")
-    return ent_gdf, mpio_gdf
