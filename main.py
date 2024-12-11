@@ -164,6 +164,25 @@ class DashboardApp:
                 ["Muy estable", "Estable", "Inestable", "Muy inestable"], key="incertidumbre_personal")
         st.radio("¿Cómo calificarías la estabilidad de la economía del país?", 
                 ["Muy estable", "Estable", "Inestable", "Muy inestable"], key="incertidumbre_nacional")
+        
+        # Al final de mostrar_respuestas
+        # Al final de la sección del cuestionario
+        st.markdown("---")  # Línea divisoria para separar visualmente
+        st.markdown(
+            """
+            <div style="background-color:#F1F8E9;padding:15px;border-radius:10px;margin-top:20px;">
+                <h4 style="text-align:center;color:#2E7D32;">📝 Descubre los Resultados</h4>
+                <p style="text-align:center;">
+                    En la siguiente sección, exploraremos a qué <b>clúster económico</b> pertenece tu municipio basado en los datos que proporcionaste.
+                </p>
+                <p style="text-align:center;">
+                    También analizaremos cómo se compara tu ingreso con los deciles de ingresos de tu municipio, proporcionándote una <b>visión personalizada</b> de tu situación económica.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown("")  # Línea divisoria para separar visualmente
 
         st.button("Enviar", on_click=self.enviar_respuestas)
 
@@ -215,7 +234,7 @@ class DashboardApp:
         # Explicación sobre cambios por año
         st.markdown(
             """
-            <p><i>Nota: Los clústeres pueden cambiar año con año debido a cambios en los datos económicos y sociales. 
+            <p><i>Nota: La colocacion de clústeres pueden cambiar año con año debido a cambios en los datos económicos y sociales. 
             Si seleccionas un año diferente, puedes observar variaciones en el clúster de tu municipio.</i></p>
             """,
             unsafe_allow_html=True
@@ -254,42 +273,91 @@ class DashboardApp:
             4: "El Chavo: Los que sobreviven con esperanza."
         }
 
-        analogia = analogias.get(cluster, "Desconocido")
-        st.markdown(f"### 📖 Analogía del Clúster: {analogia}")
-
-        st.write(
-            f"Tu municipio pertenece al clúster **{cluster}** para el año **{year}**. "
-            f"Este clúster está representado por el personaje: **{analogia}**."
-        )
-
         # Comparativa personalizada
         ingresos_usuario = user_data.get("Ingresos")
-        ingresos_promedio = deciles.get("Decil 5")
-        decil_1_cluster = deciles.get("Decil 1")
-        decil_10_cluster = deciles.get("Decil 10")
+
+        # Mostrar datos del municipio
+        decil_1_municipio = municipio_cluster["decil_1"].values[0]
+        decil_5_municipio = municipio_cluster["decil_5"].values[0]
+        decil_10_municipio = municipio_cluster["decil_10"].values[0]
+        gini_municipio = municipio_cluster["gini"].values[0]
+
+        # Resumen del municipio y clúster
+        st.markdown(
+            f"""
+            <div style="border: 2px solid #4CAF50; padding: 20px; border-radius: 10px; background-color: #f9f9f9;">
+                <h2 style="color: #4CAF50; text-align: center;">📝 Resumen para tu Municipio</h2>
+                <p style="font-size: 18px; text-align: center;">
+                    En el año <b style="color: #2196F3;">{year}</b>, tu municipio <b style="color: #FF9800;">{municipio}</b> pertenece al clúster de:
+                </p>
+                <div style="margin-top: 20px; text-align: center;">
+                    <h1 style="font-size: 24px; color: #FF5722;">{analogias.get(cluster, "Desconocido")}</h1>
+                </div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <p style="font-size: 14px; color: #757575;">
+                        Este clúster refleja las características económicas, sociales y culturales de municipios similares al tuyo. 
+                        A continuación, exploraremos los datos específicos de tu municipio.
+                    </p>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown("---")
+
+        # Resumen económico del municipio
+        st.markdown(
+            f"""
+            <div style="background-color:#F1F8E9;padding:15px;border-radius:10px;margin-bottom:20px;">
+                <h3 style="text-align:center;color:#2E7D32;">📊 Resumen Económico del Municipio</h3>
+                <p style="text-align:center;">Datos específicos para tu municipio en el año seleccionado:</p>
+                <ul style="list-style:none;padding:0;margin:0;text-align:center;">
+                    <li style="margin-bottom:15px;">
+                        <b style="font-size:18px;color:#4CAF50;">Decil 1:</b> 
+                        <span style="font-size:16px;color:#616161;">${decil_1_municipio:,.2f}</span>
+                    </li>
+                    <li style="margin-bottom:15px;">
+                        <b style="font-size:18px;color:#FFC107;">Decil 5 (Promedio):</b> 
+                        <span style="font-size:16px;color:#616161;">${decil_5_municipio:,.2f}</span>
+                    </li>
+                    <li style="margin-bottom:15px;">
+                        <b style="font-size:18px;color:#FF5722;">Decil 10:</b> 
+                        <span style="font-size:16px;color:#616161;">${decil_10_municipio:,.2f}</span>
+                    </li>
+                    <li style="margin-bottom:15px;">
+                        <b style="font-size:18px;color:#1976D2;">Índice GINI:</b> 
+                        <span style="font-size:16px;color:#616161;">{gini_municipio:.3f}</span>
+                    </li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
         st.markdown("### 📊 Comparativa Personalizada")
-        # Expander: ¿Por qué el Chavo del 8?
-        # Expander: Explicación sobre deciles y línea roja
 
         st.markdown(
             f"""
-            <p>Tu ingreso mensual es de <b>${ingresos_usuario:,}</b>.</p>
-            <p>En tu clúster para el año <b>{year}</b>:</p>
-            <ul>
-                <li>El decil 1 (los ingresos más bajos) reporta un promedio de <b>${decil_1_cluster:,.2f}</b>.</li>
-                <li>El decil 10 (los ingresos más altos) alcanza <b>${decil_10_cluster:,.2f}</b>.</li>
-                <li>El decil 5 (promedio) reporta ingresos mensuales de <b>${ingresos_promedio:,.2f}</b>.</li>
-            </ul>
-            <p>Esto significa que estás <b>{'por encima' if ingresos_usuario > ingresos_promedio else 'por debajo'}</b> del promedio del decil 5.</p>
+            <p>Tu ingreso mensual reportado es de <b>${ingresos_usuario:,}</b>.</p>
+            <p>Comparado con el promedio del decil 5 en <b style="color: #FF9800;">{municipio}</b>, estás <b>{'por encima de la media' if ingresos_usuario > decil_5_municipio else 'por debajo de la media'}</b>.</p>
+            <p>La siguiente gráfica muestra cómo se ubica tu ingreso en comparación con los diez deciles de ingresos registrados en <b style="color: #FF9800;">{municipio}</b>.</p>
             """,
             unsafe_allow_html=True
         )
 
         # Generar gráfica de deciles
         st.markdown("### 📈 Visualización de Comparación por Deciles")
-        
-        grafica_deciles = graficar_deciles(deciles, ingresos_usuario, titulo=f"Comparación de tu Ingreso con los Deciles del Clúster ({year})")
+
+        # Gráfica de deciles del municipio
+        deciles_municipio = {
+            f"Decil {i}": municipio_cluster[f"decil_{i}"].values[0] for i in range(1, 11)
+        }
+        grafica_deciles = graficar_deciles(
+            deciles_municipio,
+            ingresos_usuario,
+            titulo=f"Comparación de tu Ingreso con los Deciles del Municipio ({year})"
+        )
         st.plotly_chart(grafica_deciles, use_container_width=True)
 
         with st.expander("¿Qué representan los deciles y la línea roja?"):
@@ -309,31 +377,51 @@ class DashboardApp:
                 unsafe_allow_html=True
             )
 
+
         # Coeficiente GINI
         gini_municipio = municipio_cluster["gini"].values[0]
 
         # Texto explicativo sobre el coeficiente GINI
         st.markdown("### 📉 Análisis del Coeficiente GINI")
-        
+
         html_gini = f"""
-        <p>En tu municipio, el coeficiente GINI es de <b>{gini_municipio:.3f}</b>. Esto significa que 
-        la distribución de ingresos presenta un nivel {'alto' if gini_municipio > 0.4 else 'moderado' if gini_municipio > 0.3 else 'bajo'} de desigualdad.</p>
+        <p>El coeficiente GINI en tu municipio es de <b>{gini_municipio:.3f}</b>, indicando un nivel de desigualdad en los ingresos clasificado como 
+        <b>{'alto' if gini_municipio > 0.4 else 'moderado' if gini_municipio > 0.3 else 'bajo'}</b>.</p>
+        <p>Este valor refleja cómo se distribuyen los ingresos entre los habitantes de tu municipio: 
+        un valor más cercano a 0 indica mayor igualdad, mientras que un valor cercano a 1 refleja una mayor concentración de riqueza en pocas manos.</p>
         """
         st.markdown(html_gini, unsafe_allow_html=True)
 
         # Expander:
-        with st.expander("¿Que es GINI?"):
+        with st.expander("¿Qué es y como se calucula el coeficiente GINI?"):
             st.markdown(
                 """
-                <p>El coeficiente GINI es una medida de la desigualdad en los ingresos dentro de una población. 
-                Este valor oscila entre 0 y 1, donde:</p>
+                <p>El coeficiente GINI es una medida ampliamente utilizada para evaluar la desigualdad en la distribución de ingresos dentro de una población. 
+                Este valor se sitúa entre <b>0</b> y <b>1</b>, donde:</p>
                 <ul>
-                    <li><b>0</b>: Indica igualdad perfecta (todos tienen los mismos ingresos).</li>
-                    <li><b>1</b>: Indica desigualdad máxima (una sola persona concentra todos los ingresos).</li>
+                    <li><b>0</b>: Representa igualdad perfecta, es decir, todos los individuos tienen los mismos ingresos.</li>
+                    <li><b>1</b>: Representa desigualdad máxima, donde una sola persona concentra todos los ingresos.</li>
                 </ul>
-                <p>
-                """
-            , unsafe_allow_html=True)
+                <p>El cálculo del coeficiente GINI se basa en la <b>curva de Lorenz</b>, que compara la distribución acumulativa de los ingresos 
+                frente a una línea de igualdad perfecta:</p>
+                <ul>
+                    <li>Se ordenan a los individuos por nivel de ingreso de menor a mayor.</li>
+                    <li>Se calcula el porcentaje acumulativo de ingresos para cada grupo (por ejemplo, deciles).</li>
+                    <li>La desviación entre la curva de Lorenz y la línea de igualdad se utiliza para calcular el GINI.</li>
+                </ul>
+                <p>Los <b>deciles</b> son herramientas clave en este cálculo. Dividen la población en 10 grupos iguales según nivel de ingreso, 
+                ayudando a identificar cómo se distribuyen los recursos:</p>
+                <ul>
+                    <li><b>Decil 1:</b> Representa al 10% más pobre de la población.</li>
+                    <li><b>Decil 10:</b> Representa al 10% más rico de la población.</li>
+                </ul>
+                <p>Una mayor desigualdad en los deciles (por ejemplo, si el decil 10 concentra una proporción desproporcionada del ingreso total) 
+                resulta en un coeficiente GINI más alto.</p>
+                <p>En resumen, el GINI es un indicador crucial para entender no solo cuánto gana una población en promedio, sino cómo 
+                se distribuye esa riqueza entre sus habitantes.</p>
+                """,
+                unsafe_allow_html=True
+            )
 
         # Gráfica de distribución del GINI
         st.markdown("### 📊 Distribución del Coeficiente GINI en Todos los Municipios")
@@ -419,6 +507,24 @@ class DashboardApp:
             data=cluster_data,
             nivel=f"Clúster {cluster} ({year})"
         )
+
+        # Al final de mostrar_respuestas
+        st.markdown("---")  # Línea divisoria para separar visualmente
+        st.markdown(
+            """
+            <div style="background-color:#E3F2FD;padding:15px;border-radius:10px;margin-top:20px;">
+                <h4 style="text-align:center;color:#0D47A1;">🔍 Explora Comparaciones entre Clústeres</h4>
+                <p style="text-align:center;">
+                    En la siguiente sección, podrás visualizar cómo se comparan los <b>promedios de los clústeres</b> en términos de ingresos, desigualdad y percepciones económicas.
+                </p>
+                <p style="text-align:center;">
+                    Esta comparación te permitirá entender las <b>dinámicas generales</b> y cómo diferentes clusters se posicionan frente a otros clusters.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown("")  # Línea divisoria para separar visualmente
         # Botones de navegación
         self.navegacion_botones("Respuestas")
 
@@ -428,11 +534,48 @@ class DashboardApp:
         st.title("📊 Análisis de Clústeres")
         st.markdown(
             """
-            En esta sección, puedes seleccionar uno o más clústeres para comparar sus características.
-            También puedes elegir comparar con el promedio de todos los clústeres.
-            """
+            <div style="background-color:#E3F2FD;padding:15px;border-radius:10px;margin-bottom:20px;">
+                <h4 style="text-align:center;color:#0D47A1;">🔍 ¿Qué son los clústeres?</h4>
+                <p style="text-align:justify;font-size:16px;">
+                    Los clústeres son agrupaciones de municipios con características socioeconómicas similares. 
+                    Estas agrupaciones ayudan a identificar patrones compartidos y diferencias entre localidades que 
+                    enfrentan retos y oportunidades parecidos. A diferencia de la sección anterior, aquí analizamos 
+                    <b>grupos de municipios</b> en lugar de datos individuales de un solo municipio.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 
+        with st.expander("🧐 ¿Por qué comparar clústeres?"):
+            st.markdown(
+                """
+                Comparar clústeres nos permite:
+                - Identificar similitudes y diferencias entre grupos de municipios.
+                - Analizar cómo factores como ingresos, consumo y percepción económica varían entre clústeres.
+                - Comprender cómo se comportan los municipios similares en un contexto más amplio.
+                """
+            )
+
+        st.markdown(
+            """
+            <div style="background-color:#F1F8E9;padding:15px;border-radius:10px;margin-bottom:20px;">
+                <h4 style="text-align:center;color:#2E7D32;">🛠️ ¿Qué encontrarás aquí?</h4>
+                <p style="text-align:justify;font-size:16px;">
+                    En esta sección, puedes explorar las diferencias entre clústeres en términos de:
+                </p>
+                <ul>
+                    <li>Distribución de ingresos por deciles.</li>
+                    <li>Índice GINI (desigualdad).</li>
+                    <li>Percepciones económicas.</li>
+                </ul>
+                <p style="text-align:justify;font-size:16px;">
+                    También puedes comparar los datos de los clústeres seleccionados con el <b>promedio general de todos los clústeres</b>.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
         # Load cluster data
         cluster_data = self.datos["cluster"]
 
@@ -476,15 +619,17 @@ class DashboardApp:
             cluster_summary["Cluster_Nombre"].isin(clusters_seleccionados)
         ]
 
-        # Expander: 
-        with st.expander("Recordatorio: ¿Qué representan los clústeres?"):
-            st.markdown("""
-            - **Doña Florinda**: Los que tienen, pero quieren más. Municipios con economías cómodas, pero con presión de mantener el nivel.
-            - **Quico**: Los reyes inquietos. Municipios con altos ingresos, pero atrapados en la sociedad aspiracional.
-            - **Don Ramón**: Los que luchan y avanzan. Municipios que representan la fuerza trabajadora y la resiliencia.
-            - **El Chavo**: Los que sobreviven con esperanza. Municipios en economías de subsistencia con desafíos diarios.
-            - **Promedio de Clústeres**: Valores promedio calculados de todos los clústeres.
-            """)
+        with st.expander("📖 ¿Qué significan los clústeres?"):
+            st.markdown(
+                """
+                Para entender mejor los clústeres, usamos **analogías inspiradas en personajes** del Chavo del 8, 
+                que simbolizan diferentes situaciones económicas:
+                - **Clúster 1: “Los que tienen, pero quieren más” (Doña Florinda):** Municipios con economías cómodas, pero bajo presión social.
+                - **Clúster 2: “Los reyes inquietos” (Quico):** Municipios privilegiados que enfrentan tensiones por altas expectativas.
+                - **Clúster 3: “Los que luchan y avanzan” (Don Ramón):** Municipios resilientes que trabajan para superar barreras.
+                - **Clúster 4: “Los que sobreviven con esperanza” (El Chavo):** Municipios con economías de subsistencia y baja desigualdad.
+                """
+            )
 
         st.subheader("📊 Comparativa entre los Clústeres Seleccionados")
 
@@ -597,14 +742,27 @@ class DashboardApp:
         )
 
         # Conexión a la siguiente sección
-        st.subheader("🔗 Explora Datos Personalizados en el Dashboard")
+        st.markdown("---")  # Línea divisoria para separar visualmente
         st.markdown(
             """
-            Ahora que hemos analizado los cambios en los clústeres y el Índice de GINI, puedes explorar todos los datos disponibles
-            para cada municipio y año. Esto te permitirá realizar análisis personalizados y profundizar en las dinámicas económicas
-            y sociales que afectan a cada región.
-            """
+            <div style="background-color:#E8F5E9;padding:15px;border-radius:10px;margin-top:20px;">
+                <h4 style="text-align:center;color:#1B5E20;">🔍 Explora y Experimenta en el Dashboard</h4>
+                <p style="text-align:center;">
+                    Hasta ahora, hemos analizado <b>tus datos personales en comparación con tu municipio</b> y también explorado 
+                    <b>cómo se comportan los clústeres en promedio</b>, destacando patrones generales y tendencias importantes.
+                </p>
+                <p style="text-align:center;">
+                    En la próxima sección, tendrás acceso a un <b>dashboard interactivo</b>, diseñado para que experimentes con diferentes 
+                    configuraciones. Podrás explorar datos personalizados seleccionando otros municipios, estados, años, y comparando métricas clave.
+                </p>
+                <p style="text-align:center;font-weight:bold;">
+                    ¡Descubre cómo otros municipios se comportan y cómo se posicionan en el panorama socioeconómico!
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
+        st.markdown("")
             # Botones de navegación
         self.navegacion_botones("Clusters")
 
