@@ -255,26 +255,51 @@ def graficar_ingresos_deciles(data, clusters_seleccionados):
 
 @st.cache_resource
 def graficar_gini(df_clusters, clusters_seleccionados):
-    import plotly.express as px
+    import plotly.graph_objects as go
 
-    max_value = df_clusters["gini"].max()
+    # Filter only the selected clusters
+    filtered_clusters = df_clusters[df_clusters["Cluster_Nombre"].isin(clusters_seleccionados)]
 
-    fig = px.bar(
-        df_clusters,
-        x="Cluster_Nombre",
-        y="gini",
+    # Maximum GINI value for scaling
+    max_value = filtered_clusters["gini"].max()
+
+    # Create a bar chart
+    fig = go.Figure()
+
+    # Add bars for each cluster
+    for _, row in filtered_clusters.iterrows():
+        fig.add_trace(go.Bar(
+            x=[row["Cluster_Nombre"]],
+            y=[row["gini"]],
+            text=f"{row['gini']:.2f}",
+            textposition="outside",
+            marker_color=px.colors.qualitative.Set2[filtered_clusters.index.get_loc(_)],
+            name=row["Cluster_Nombre"]
+        ))
+
+    # Update layout
+    fig.update_layout(
         title="Índice GINI por Clúster",
-        labels={"gini": "Índice GINI", "Cluster_Nombre": "Clúster"},
-        color="Cluster_Nombre",
-        color_discrete_sequence=px.colors.qualitative.Set2,
+        xaxis=dict(
+            title="Clúster",
+            tickangle=45,
+            titlefont=dict(size=14),
+            tickfont=dict(size=12)
+        ),
+        yaxis=dict(
+            title="Índice GINI",
+            titlefont=dict(size=14),
+            tickfont=dict(size=12),
+            range=[0, max_value * 1.15]  # Add 15% margin for text outside the bars
+        ),
+        barmode="group",
+        legend_title="Clúster",
+        plot_bgcolor="rgba(245, 245, 245, 1)",
+        margin=dict(t=50, b=50, l=50, r=50),
     )
 
-    fig.update_traces(
-        text=df_clusters["gini"].round(2),
-        texttemplate="%{text:.2f}",
-        textposition="outside"
-    )
-    return ajustar_rango_y(fig, max_value)
+    return fig
+
 
 @st.cache_resource
 def graficar_percepciones_economicas(data, clusters_seleccionados):
