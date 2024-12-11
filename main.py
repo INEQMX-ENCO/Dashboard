@@ -269,6 +269,9 @@ class DashboardApp:
         decil_10_cluster = deciles.get("Decil 10")
 
         st.markdown("### 📊 Comparativa Personalizada")
+        # Expander: ¿Por qué el Chavo del 8?
+        # Expander: Explicación sobre deciles y línea roja
+
         st.markdown(
             f"""
             <p>Tu ingreso mensual es de <b>${ingresos_usuario:,}</b>.</p>
@@ -285,25 +288,52 @@ class DashboardApp:
 
         # Generar gráfica de deciles
         st.markdown("### 📈 Visualización de Comparación por Deciles")
+        
         grafica_deciles = graficar_deciles(deciles, ingresos_usuario, titulo=f"Comparación de tu Ingreso con los Deciles del Clúster ({year})")
         st.plotly_chart(grafica_deciles, use_container_width=True)
+
+        with st.expander("¿Qué representan los deciles y la línea roja?"):
+            st.markdown(
+                """
+                <p>Los deciles dividen la población en diez grupos iguales según ingreso:</p>
+                <ul>
+                    <li><b>Decil 1:</b> El 10% con los ingresos más bajos.</li>
+                    <li><b>Decil 10:</b> El 10% con los ingresos más altos.</li>
+                </ul>
+                <p>La línea punteada roja (eje 0) muestra tu ingreso. Las barras indican:</p>
+                <ul>
+                    <li><b>Encima:</b> Ingresos promedio del decil mayores que los tuyos.</li>
+                    <li><b>Debajo:</b> Ingresos promedio del decil menores que los tuyos.</li>
+                </ul>
+                """,
+                unsafe_allow_html=True
+            )
 
         # Coeficiente GINI
         gini_municipio = municipio_cluster["gini"].values[0]
 
         # Texto explicativo sobre el coeficiente GINI
         st.markdown("### 📉 Análisis del Coeficiente GINI")
+        
         html_gini = f"""
-        <p>El coeficiente GINI es una medida de la desigualdad en los ingresos dentro de una población. 
-        Este valor oscila entre 0 y 1, donde:</p>
-        <ul>
-            <li><b>0</b>: Indica igualdad perfecta (todos tienen los mismos ingresos).</li>
-            <li><b>1</b>: Indica desigualdad máxima (una sola persona concentra todos los ingresos).</li>
-        </ul>
         <p>En tu municipio, el coeficiente GINI es de <b>{gini_municipio:.3f}</b>. Esto significa que 
         la distribución de ingresos presenta un nivel {'alto' if gini_municipio > 0.4 else 'moderado' if gini_municipio > 0.3 else 'bajo'} de desigualdad.</p>
         """
         st.markdown(html_gini, unsafe_allow_html=True)
+
+        # Expander:
+        with st.expander("¿Que es GINI?"):
+            st.markdown(
+                """
+                <p>El coeficiente GINI es una medida de la desigualdad en los ingresos dentro de una población. 
+                Este valor oscila entre 0 y 1, donde:</p>
+                <ul>
+                    <li><b>0</b>: Indica igualdad perfecta (todos tienen los mismos ingresos).</li>
+                    <li><b>1</b>: Indica desigualdad máxima (una sola persona concentra todos los ingresos).</li>
+                </ul>
+                <p>
+                """
+            , unsafe_allow_html=True)
 
         # Gráfica de distribución del GINI
         st.markdown("### 📊 Distribución del Coeficiente GINI en Todos los Municipios")
@@ -333,6 +363,22 @@ class DashboardApp:
         </ul>
         """
         st.markdown(html_percepcion, unsafe_allow_html=True)
+
+        # Expander: Explicación sobre la categorización de percepciones
+        with st.expander("¿Cómo se categorizaron las percepciones?"):
+            st.markdown(
+                """
+                <p>Las percepciones se clasificaron en categorías tomando como base las respuestas a la encuesta ENCO:</p>
+                <ul>
+                    <li><b>Percepción Económica Personal Positiva:</b> Respuestas optimistas sobre su situación económica personal.</li>
+                    <li><b>Percepción Económica Personal Negativa:</b> Respuestas que reflejan preocupación o insatisfacción económica personal.</li>
+                    <li><b>Percepción Nacional Positiva:</b> Opiniones optimistas sobre la economía del país.</li>
+                    <li><b>Percepción Nacional Negativa:</b> Respuestas que indican incertidumbre o descontento con la economía nacional.</li>
+                </ul>
+                <p>Estas categorías se construyeron al agrupar las respuestas individuales en función de su tono y enfoque.</p>
+                """,
+                unsafe_allow_html=True
+            )
 
         # Gráfico combinado para percepciones personales y nacionales
         categorias_percepcion_combined = {
@@ -379,7 +425,7 @@ class DashboardApp:
     def mostrar_cluster(self):
         import pandas as pd
 
-        st.title("📊 Dashboard: Análisis de Clústeres")
+        st.title("📊 Análisis de Clústeres")
         st.markdown(
             """
             En esta sección, puedes seleccionar uno o más clústeres para comparar sus características.

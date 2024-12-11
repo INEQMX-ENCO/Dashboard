@@ -24,69 +24,70 @@ def graficar_deciles(deciles, ingreso_usuario, titulo):
     for i, (key, diferencia) in enumerate(diferencias.items()):
         color = verde_calmado[i] if diferencia > 0 else rojo_invertido[i]
         fig.add_trace(go.Bar(
-            name=f"Decil {i + 1}",  # Nombre de la barra
-            x=[key],  # Nombre del decil en eje X
-            y=[diferencia],  # Diferencia en eje Y
-            text=f"{diferencia:+,.0f} MXN",  # Texto con diferencia formateada
-            textposition="outside",  # Posición del texto fuera de las barras
+            name=f"Decil {i + 1}",
+            x=[key],
+            y=[diferencia],
+            text=f"{diferencia:+,.0f} MXN",
+            textposition="outside",
             marker_color=color
         ))
 
     # Agregar línea base del usuario
     fig.add_trace(go.Scatter(
         name=f"Ingreso del Usuario (${ingreso_usuario:,.0f})",
-        x=list(deciles.keys()),  # Línea a lo largo de los deciles
-        y=[0] * len(deciles),  # Línea en 0
+        x=list(deciles.keys()),
+        y=[0] * len(deciles),
         mode="lines",
         line=dict(color="brown", width=3, dash="dash"),
-        showlegend=False  # Elimina la leyenda para esta traza
+        showlegend=False
     ))
 
     # Ajustar rango dinámico para asegurar que la anotación sea visible
     max_valor = max(valores)
     min_valor = min(valores)
-    margen = (abs(max_valor) + abs(min_valor)) * 0.1  # Margen dinámico (10% del rango total)
+    margen = (abs(max_valor) + abs(min_valor)) * 0.1
     y_max = max_valor + margen
     y_min = min_valor - margen
 
-    # Configurar anotación simplificada
+    # Configurar anotación simplificada, movida a la derecha
     fig.update_layout(
         annotations=[
             dict(
-                xref="paper",  # Referencia al espacio del gráfico
-                yref="y",  # Referencia al eje Y
-                x=0.05,  # Pegado a la izquierda (1% desde el borde izquierdo)
-                y=0,  # Posición en el eje Y = 0
+                xref="paper",
+                yref="y",
+                x=1.05,  # Mover a la derecha, fuera de la gráfica
+                y=0,  # Centrado en el eje Y
                 text=(
                     f"<b style='font-size:16px; color:red;'>Ingreso del Usuario</b><br>"
                     f"<span style='font-size:16px; color:black;'>${ingreso_usuario:,.0f} MXN</span>"
                 ),
-                showarrow=True,  # Mostrar flecha
-                arrowhead=2,  # Tipo de flecha
-                arrowcolor="red",  # Color de la flecha
-                ax=50,  # Desplazamiento horizontal desde el texto
-                ay=-50,  # Flecha apuntando hacia abajo
-                align="left",  # Alineado a la izquierda
+                showarrow=False,  # Eliminar la flecha
+                align="left",  # Alinear texto a la izquierda
+                bordercolor="black",
+                borderwidth=1,
+                borderpad=5,
+                bgcolor="rgba(255, 255, 255, 0.8)",
+                font=dict(size=12)
             ),
         ],
         title=dict(
             text=titulo,
-            x=0.5,  # Centrar título
+            x=0.5,
             xanchor="center",
             font=dict(size=18, color="black")
         ),
         xaxis=dict(
             title="Deciles de Ingreso",
             titlefont=dict(size=14),
-            showticklabels=False,
-            tickangle=0,  # Asegura que los ticks estén horizontalmente alineados
-            automargin=True  # Ajusta automáticamente el margen para evitar que los ticks se corten
+            showticklabels=True,
+            tickangle=0,
+            automargin=True
         ),
         yaxis=dict(
             title="Diferencia de Ingresos ($)",
             titlefont=dict(size=14),
             tickfont=dict(size=12),
-            range=[y_min, y_max],  # Asegura que la anotación y las etiquetas sean visibles
+            range=[y_min, y_max],
             zeroline=True,
             zerolinewidth=2,
             zerolinecolor="brown"
@@ -95,6 +96,7 @@ def graficar_deciles(deciles, ingreso_usuario, titulo):
     )
 
     return fig
+
 
 @st.cache_resource
 def graficar_percepciones(categorias_percepcion, data, nivel):
