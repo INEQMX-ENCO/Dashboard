@@ -496,16 +496,6 @@ class DashboardApp:
             st.plotly_chart(graficar_consumo_ahorro(cluster_summary_filtered, clusters_seleccionados))
             st.plotly_chart(graficar_percepciones_economicas(cluster_summary_filtered, clusters_seleccionados))
 
-        # Conexión a la siguiente sección
-        st.subheader("🔗 Explora Datos Personalizados en el Dashboard")
-        st.markdown(
-            """
-            Ahora que hemos analizado los cambios en los clústeres y el Índice de GINI, puedes explorar todos los datos disponibles
-            para cada municipio y año. Esto te permitirá realizar análisis personalizados y profundizar en las dinámicas económicas
-            y sociales que afectan a cada región.
-            """
-        )
-
         st.markdown("## 🔍 Observaciones Resumidas por Clúster")
 
         # Crear dos columnas para los expanders
@@ -603,6 +593,16 @@ class DashboardApp:
             - **Expectativas ajustadas en los más pobres:** En el clúster 4 (*El Chavo*), las personas manejan mejor las dificultades gracias a expectativas más bajas.
             - **La clase trabajadora valora cada mejora:** En el clúster 3 (*Don Ramón*), las intervenciones económicas en los deciles bajos y medios generan impactos positivos desproporcionados.
             - **La desigualdad amplifica tensiones:** En todos los clústers, las brechas extremas entre deciles aumentan las percepciones negativas y las tensiones sociales.
+            """
+        )
+
+        # Conexión a la siguiente sección
+        st.subheader("🔗 Explora Datos Personalizados en el Dashboard")
+        st.markdown(
+            """
+            Ahora que hemos analizado los cambios en los clústeres y el Índice de GINI, puedes explorar todos los datos disponibles
+            para cada municipio y año. Esto te permitirá realizar análisis personalizados y profundizar en las dinámicas económicas
+            y sociales que afectan a cada región.
             """
         )
             # Botones de navegación
