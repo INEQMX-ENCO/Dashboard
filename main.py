@@ -95,7 +95,7 @@ class DashboardApp:
 
         for section, func in self.secciones.items():
             disabled = False
-            if section == "Dashboard" and not st.session_state.get("user_data"):
+            if section == "Respuestas" and not st.session_state.get("user_data"):
                 disabled = True
             st.sidebar.button(section, on_click=self.set_section, args=(section,), disabled=disabled)
             
@@ -505,7 +505,107 @@ class DashboardApp:
             y sociales que afectan a cada región.
             """
         )
-        # Botones de navegación
+
+        st.markdown("## 🔍 Observaciones Resumidas por Clúster")
+
+        # Crear dos columnas para los expanders
+        col1, col2 = st.columns(2)
+
+        # Clúster 1 y 2 en la primera columna
+        with col1:
+            with st.expander("Clúster 1: Los que tienen, pero quieren más (Doña Florinda)"):
+                st.markdown(
+                    f"""
+                    <p><b>Ingresos promedio mensuales:</b></p>
+                    <ul>
+                        <li><b>Decil 1:</b> ${6_876:,.0f}</li>
+                        <li><b>Decil 5:</b> ${19_547:,.0f}</li>
+                        <li><b>Decil 10:</b> ${80_421:,.0f}</li>
+                    </ul>
+                    <p><b>Desigualdad:</b> Moderada (GINI: 0.3705)</p>
+                    <p><b>Lo que se vive aquí:</b></p>
+                    <ul>
+                        <li>El 49.2% enfrenta consumo restringido, mientras que un 20.5% ahorra y gasta en cosas no esenciales.</li>
+                        <li>Percepciones mixtas: 16.9% tiene percepciones negativas personales; 24.1% perciben la economía nacional en mal estado.</li>
+                    </ul>
+                    <p><b>Conclusión:</b> La presión de mantener un nivel económico y la comparación social generan tensiones.</p>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            with st.expander("Clúster 2: Los reyes inquietos (Quico)"):
+                st.markdown(
+                    f"""
+                    <p><b>Ingresos promedio mensuales:</b></p>
+                    <ul>
+                        <li><b>Decil 1:</b> ${8_820:,.0f}</li>
+                        <li><b>Decil 5:</b> ${29_865:,.0f}</li>
+                        <li><b>Decil 10:</b> ${465_308:,.0f}</li>
+                    </ul>
+                    <p><b>Desigualdad:</b> Alta (GINI: 0.5565)</p>
+                    <p><b>Lo que se vive aquí:</b></p>
+                    <ul>
+                        <li>43.1% enfrenta consumo restringido, aunque el 25.1% logra consumo positivo.</li>
+                        <li>Optimismo personal (solo 13.9% percepciones negativas), pero 24.8% ven la economía nacional preocupante.</li>
+                    </ul>
+                    <p><b>Conclusión:</b> Las altas expectativas en estos municipios generan insatisfacción, incluso con altos ingresos.</p>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+        # Clúster 3 y 4 en la segunda columna
+        with col2:
+            with st.expander("Clúster 3: Los que luchan y avanzan (Don Ramón)"):
+                st.markdown(
+                    f"""
+                    <p><b>Ingresos promedio mensuales:</b></p>
+                    <ul>
+                        <li><b>Decil 1:</b> ${4_955:,.0f}</li>
+                        <li><b>Decil 5:</b> ${14_072:,.0f}</li>
+                        <li><b>Decil 10:</b> ${56_016:,.0f}</li>
+                    </ul>
+                    <p><b>Desigualdad:</b> Moderada (GINI: 0.3631)</p>
+                    <p><b>Lo que se vive aquí:</b></p>
+                    <ul>
+                        <li>El 49.6% enfrenta consumo restringido, pero un 21.9% mejora su situación con ahorro.</li>
+                        <li>Percepciones: 15.3% negativas personales; 22.9% negativas nacionales.</li>
+                    </ul>
+                    <p><b>Conclusión:</b> Estos municipios representan la fuerza trabajadora, donde las pequeñas mejoras son grandes logros.</p>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            with st.expander("Clúster 4: Los que sobreviven con esperanza (El Chavo)"):
+                st.markdown(
+                    f"""
+                    <p><b>Ingresos promedio mensuales:</b></p>
+                    <ul>
+                        <li><b>Decil 1:</b> ${3_704:,.0f}</li>
+                        <li><b>Decil 5:</b> ${10_377:,.0f}</li>
+                        <li><b>Decil 10:</b> ${36_104:,.0f}</li>
+                    </ul>
+                    <p><b>Desigualdad:</b> Baja (GINI: 0.3384)</p>
+                    <p><b>Lo que se vive aquí:</b></p>
+                    <ul>
+                        <li>El 63.0% enfrenta consumo restringido, mientras que el 21.7% logra ahorro positivo.</li>
+                        <li>Las percepciones son las más negativas: 23.0% personales; 28.7% nacionales.</li>
+                    </ul>
+                    <p><b>Conclusión:</b> Aunque enfrentan grandes desafíos diarios, las bajas expectativas ayudan a manejar las dificultades con resiliencia.</p>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+        # Conclusiones generales
+        st.markdown("## 📝 Conclusiones Finales")
+        st.markdown(
+            """
+            - **Los municipios ricos también lloran:** En el clúster 2 (*Quico*), las expectativas elevadas generan insatisfacción, incluso en contextos privilegiados.
+            - **Expectativas ajustadas en los más pobres:** En el clúster 4 (*El Chavo*), las personas manejan mejor las dificultades gracias a expectativas más bajas.
+            - **La clase trabajadora valora cada mejora:** En el clúster 3 (*Don Ramón*), las intervenciones económicas en los deciles bajos y medios generan impactos positivos desproporcionados.
+            - **La desigualdad amplifica tensiones:** En todos los clústers, las brechas extremas entre deciles aumentan las percepciones negativas y las tensiones sociales.
+            """
+        )
+            # Botones de navegación
         self.navegacion_botones("Clusters")
 
 
