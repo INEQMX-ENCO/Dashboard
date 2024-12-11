@@ -129,6 +129,7 @@ def graficar_percepciones(categorias_percepcion, data, nivel):
     )
     st.plotly_chart(fig)
 
+@st.cache_resource
 def graficar_distribucion_gini(data, gini_municipio, nivel, bins=20):
     """
     Genera un gráfico que muestra la distribución del coeficiente GINI
@@ -209,7 +210,7 @@ def graficar_distribucion_gini(data, gini_municipio, nivel, bins=20):
 
 
 '''------------------DASHBOARD-------------------------'''
-
+@st.cache_resource
 def ajustar_rango_y(fig, max_value, margen=0.15):
     """
     Ajusta el rango del eje Y para evitar que los valores altos se corten.
@@ -221,6 +222,7 @@ def ajustar_rango_y(fig, max_value, margen=0.15):
         fig.update_yaxes(range=[0, 1])  # Configuración predeterminada para valores bajos o nulos
     return fig
 
+@st.cache_resource
 def graficar_ingresos_deciles(data, clusters_seleccionados):
     import plotly.express as px
 
@@ -249,6 +251,7 @@ def graficar_ingresos_deciles(data, clusters_seleccionados):
     fig.update_traces(texttemplate="%{y:,.0f}", textposition="outside", cliponaxis=False)
     return ajustar_rango_y(fig, max_value)
 
+@st.cache_resource
 def graficar_gini(df_clusters, clusters_seleccionados):
     import plotly.express as px
 
@@ -271,6 +274,7 @@ def graficar_gini(df_clusters, clusters_seleccionados):
     )
     return ajustar_rango_y(fig, max_value)
 
+@st.cache_resource
 def graficar_percepciones_economicas(data, clusters_seleccionados):
     import plotly.express as px
 
@@ -310,6 +314,7 @@ def graficar_percepciones_economicas(data, clusters_seleccionados):
     )
     return ajustar_rango_y(fig, max_value)
 
+@st.cache_resource
 def graficar_consumo_ahorro(data, clusters_seleccionados):
     import plotly.express as px
 
