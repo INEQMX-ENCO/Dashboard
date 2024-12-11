@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 import matplotlib.colors as mcolors
 
+
 @st.cache_resource
 def graficar_deciles(deciles, ingreso_usuario, titulo):
     fig = go.Figure()
@@ -128,15 +129,25 @@ def graficar_percepciones(categorias_percepcion, data, nivel):
     )
     st.plotly_chart(fig)
 
-def graficar_distribucion_gini(data, nivel, bins=20):
-    # Calcular el promedio del GINI
-    promedio_gini = data["gini"].mean()
+def graficar_distribucion_gini(data, gini_municipio, nivel, bins=20):
+    """
+    Genera un gráfico que muestra la distribución del coeficiente GINI
+    para todos los municipios y resalta el GINI del municipio seleccionado.
 
+    Parameters:
+    - data (pd.DataFrame): Datos con la columna "gini".
+    - gini_municipio (float): GINI del municipio seleccionado.
+    - nivel (str): Nivel o descripción del gráfico.
+    - bins (int): Número de bins para el histograma.
+
+    Returns:
+    - None: Renderiza el gráfico directamente en Streamlit.
+    """
     # Crear el histograma con Plotly
     fig = px.histogram(
-        data, 
-        x="gini", 
-        nbins=bins, 
+        data,
+        x="gini",
+        nbins=bins,
         title=f"Distribución del GINI ({nivel})",
         color_discrete_sequence=["#4CAF50"]  # Verde suave
     )
@@ -147,26 +158,26 @@ def graficar_distribucion_gini(data, nivel, bins=20):
         textposition="outside"
     )
     
-    # Agregar línea vertical para el promedio
+    # Agregar línea vertical para el GINI del municipio
     fig.add_shape(
         type="line",
-        x0=promedio_gini, x1=promedio_gini,
+        x0=gini_municipio, x1=gini_municipio,
         y0=0, y1=1,  # De 0 al 100% del rango del eje Y
         xref="x",  # Referencia al eje X
         yref="paper",  # Referencia a todo el rango del papel (gráfico)
-        line=dict(color="red", width=2, dash="dash")  # Línea roja discontinua
+        line=dict(color="blue", width=3, dash="dash")  # Línea azul discontinua
     )
     
-    # Agregar anotación para el promedio
+    # Agregar anotación para el GINI del municipio
     fig.add_annotation(
-        x=promedio_gini,
+        x=gini_municipio,
         y=1.05,  # Justo por encima del rango del gráfico
         text=(
-                    f"<b style='font-size:16px; color:red;'>GINI Promedio</b><br>"
-                    f"<span style='font-size:16px; color:black;'>{promedio_gini:,.3f}</span>"
-                ),
+            f"<b style='font-size:16px; color:blue;'>GINI Municipio</b><br>"
+            f"<span style='font-size:16px; color:black;'>{gini_municipio:,.3f}</span>"
+        ),
         showarrow=False,
-        font=dict(size=12, color="red"),
+        font=dict(size=12, color="blue"),
         bgcolor="rgba(255, 255, 255, 0.8)",
         borderwidth=1,
         borderpad=4,
@@ -191,92 +202,147 @@ def graficar_distribucion_gini(data, nivel, bins=20):
         ),
         bargap=0.2,  # Espacio entre las barras
         plot_bgcolor="rgba(245, 245, 245, 1)",  # Fondo claro
-        margin=dict(t=50, b=50, l=50, r=50)  # Margenes uniformes
+        margin=dict(t=50, b=50, l=50, r=50)  # Márgenes uniformes
     )
-
     # Mostrar el gráfico en Streamlit
     st.plotly_chart(fig)
 
+
+'''------------------DASHBOARD-------------------------'''
 
 def ajustar_rango_y(fig, max_value, margen=0.15):
     """
     Ajusta el rango del eje Y para evitar que los valores altos se corten.
     """
-    fig.update_yaxes(range=[0, max_value * (1 + margen)])
+    # Asegurar que el rango sea ajustado de manera consistente
+    if max_value > 0:
+        fig.update_yaxes(range=[0, max_value * (1 + margen)])
+    else:
+        fig.update_yaxes(range=[0, 1])  # Configuración predeterminada para valores bajos o nulos
     return fig
 
+def graficar_ingresos_deciles(data, clusters_seleccionados):
+    import plotly.express as px
 
-def graficar_ingresos_promedio(df_clusters, cluster_seleccionado):
-    color_map = {cluster: "lightgray" for cluster in df_clusters["Cluster"]}
-    color_map[cluster_seleccionado] = "orange"  # Resalta el cluster seleccionado
+    melted_data = data.melt(id_vars=["Cluster_Nombre"], value_vars=["decil_1", "decil_10"])
+    max_value = melted_data["value"].max()
 
     fig = px.bar(
-        df_clusters,
-        x="Cluster",
-        y="Ingreso Promedio",
-        title="Ingresos Promedio por Cluster",
-        text="Ingreso Promedio",
-        labels={"Ingreso Promedio": "Ingreso Promedio ($)", "Cluster": "Clusters"},
-        color="Cluster",
-        color_discrete_map=color_map,
+        data_frame=melted_data,
+        x="variable",
+        y="value",
+        color="Cluster_Nombre",
+        color_discrete_sequence=px.colors.qualitative.Set2,
+        barmode="group",
+        labels={"value": "Ingreso Mensual (MXN)", "variable": "Decil"},
+        title="Comparativa de Ingresos Decil 1 y Decil 10",
     )
-    fig.update_traces(texttemplate="$%{text:,}", textposition="outside")
-    max_value = df_clusters["Ingreso Promedio"].max()
+
+    fig.update_layout(
+        xaxis_title="Decil",
+        yaxis_title="Ingreso Mensual (MXN)",
+        legend_title="Clúster",
+        font=dict(size=14),
+        plot_bgcolor="rgba(245, 245, 245, 1)",
+        margin=dict(t=50),
+    )
+    fig.update_traces(texttemplate="%{y:,.0f}", textposition="outside", cliponaxis=False)
     return ajustar_rango_y(fig, max_value)
 
+def graficar_gini(df_clusters, clusters_seleccionados):
+    import plotly.express as px
 
-def graficar_gini(df_clusters, cluster_seleccionado):
-    color_map = {cluster: "lightgray" for cluster in df_clusters["Cluster"]}
-    color_map[cluster_seleccionado] = "blue"  # Resalta el cluster seleccionado
+    max_value = df_clusters["gini"].max()
 
     fig = px.bar(
         df_clusters,
-        x="Cluster",
-        y="GINI",
-        title="Índice GINI por Cluster",
-        text="GINI",
-        labels={"GINI": "Índice GINI", "Cluster": "Clusters"},
-        color="Cluster",
-        color_discrete_map=color_map,
+        x="Cluster_Nombre",
+        y="gini",
+        title="Índice GINI por Clúster",
+        labels={"gini": "Índice GINI", "Cluster_Nombre": "Clúster"},
+        color="Cluster_Nombre",
+        color_discrete_sequence=px.colors.qualitative.Set2,
     )
-    fig.update_traces(texttemplate="%{text:.2f}", textposition="outside")
-    max_value = df_clusters["GINI"].max()
+
+    fig.update_traces(
+        text=df_clusters["gini"].round(2),
+        texttemplate="%{text:.2f}",
+        textposition="outside"
+    )
     return ajustar_rango_y(fig, max_value)
 
+def graficar_percepciones_economicas(data, clusters_seleccionados):
+    import plotly.express as px
 
-def graficar_percepciones_negativas(df_clusters, cluster_seleccionado):
-    color_map = {cluster: "lightgray" for cluster in df_clusters["Cluster"]}
-    color_map[cluster_seleccionado] = "green"  # Resalta el cluster seleccionado
+    percepciones = [
+        "Percepcion_Economica_Personal_Positiva",
+        "Percepcion_Economica_Personal_Negativa",
+        "Percepcion_Naciona_Positiva",
+        "Percepcion_Nacional_Negativa",
+    ]
+
+    melted_data = data.melt(id_vars=["Cluster_Nombre"], value_vars=percepciones)
+    max_value = melted_data["value"].max()
 
     fig = px.bar(
-        df_clusters,
-        x="Cluster",
-        y="Percepción Negativa",
-        title="Percepción Económica Negativa por Cluster",
-        text="Percepción Negativa",
-        labels={"Percepción Negativa": "Percepción Económica Negativa (%)", "Cluster": "Clusters"},
-        color="Cluster",
-        color_discrete_map=color_map,
+        data_frame=melted_data,
+        x="variable",
+        y="value",
+        color="Cluster_Nombre",
+        color_discrete_sequence=px.colors.qualitative.Set2,
+        barmode="group",
+        labels={"value": "Porcentaje (%)", "variable": "Percepción"},
+        title="Comparativa de Percepciones Económicas",
     )
-    fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
-    max_value = df_clusters["Percepción Negativa"].max()
+
+    fig.update_layout(
+        xaxis_title="Percepción Económica",
+        yaxis_title="Porcentaje (%)",
+        legend_title="Clúster",
+        font=dict(size=14),
+        plot_bgcolor="rgba(245, 245, 245, 1)",
+        margin=dict(t=50),
+    )
+    fig.update_traces(
+        texttemplate="%{y:.2f}%",
+        textposition="outside",
+        cliponaxis=False,
+    )
     return ajustar_rango_y(fig, max_value)
 
+def graficar_consumo_ahorro(data, clusters_seleccionados):
+    import plotly.express as px
 
-def graficar_consumo_restringido(df_clusters, cluster_seleccionado):
-    color_map = {cluster: "lightgray" for cluster in df_clusters["Cluster"]}
-    color_map[cluster_seleccionado] = "purple"  # Resalta el cluster seleccionado
+    consumo_ahorro = [
+        "Consumo_Ahorro_Negativo",
+        "Consumo_Ahorro_Positivo",
+    ]
+
+    melted_data = data.melt(id_vars=["Cluster_Nombre"], value_vars=consumo_ahorro)
+    max_value = melted_data["value"].max()
 
     fig = px.bar(
-        df_clusters,
-        x="Cluster",
-        y="Consumo Restringido",
-        title="Consumo Restringido por Cluster",
-        text="Consumo Restringido",
-        labels={"Consumo Restringido": "Consumo Restringido (%)", "Cluster": "Clusters"},
-        color="Cluster",
-        color_discrete_map=color_map,
+        data_frame=melted_data,
+        x="variable",
+        y="value",
+        color="Cluster_Nombre",
+        color_discrete_sequence=px.colors.qualitative.Set2,
+        barmode="group",
+        labels={"value": "Porcentaje (%)", "variable": "Consumo/Ahorro"},
+        title="Comparativa de Consumo y Ahorro",
     )
-    fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
-    max_value = df_clusters["Consumo Restringido"].max()
+
+    fig.update_layout(
+        xaxis_title="Consumo y Ahorro",
+        yaxis_title="Porcentaje (%)",
+        legend_title="Clúster",
+        font=dict(size=14),
+        plot_bgcolor="rgba(245, 245, 245, 1)",
+        margin=dict(t=50),
+    )
+    fig.update_traces(
+        texttemplate="%{y:.2f}%",
+        textposition="outside",
+        cliponaxis=False,
+    )
     return ajustar_rango_y(fig, max_value)

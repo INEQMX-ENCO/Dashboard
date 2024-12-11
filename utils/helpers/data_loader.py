@@ -52,3 +52,20 @@ def load_nacional_data():
     df[columns_to_convert] = df[columns_to_convert] / 3
     
     return df
+
+@st.cache_data
+def load_summary_cluster_data():
+    """Cargar datos de ENIGH nacionales y ajustar nombres de columnas."""
+    # Cargar datos
+    df = pd.read_csv('data/processed/summary_municipales_cluster.csv')
+    
+    # Generar la lista de columnas de deciles del 1 al 10
+    decile_columns = [f"decil_{i}" for i in range(1, 11)]
+    
+    # Agregar la columna de ingreso promedio total a la lista
+    columns_to_convert = decile_columns + ["ingreso_promedio_total"]
+    
+    # Convertir las columnas seleccionadas a valores mensuales
+    df[columns_to_convert] = df[columns_to_convert] / 3
+    
+    return df
